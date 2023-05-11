@@ -40,10 +40,6 @@ downloadBtn.addEventListener("click", (e) => {
 function fetchdataOnclick() {
   fetch(`${url}${Input.value}`, options)
     .then((res) => {
-      console.log(res);
-      if (!res.ok) {
-        throw new Error();
-      }
       return res.json();
     })
     .then((res) => {
@@ -55,7 +51,6 @@ function fetchdataOnclick() {
       desc = res.result.aweme_detail.desc;
       cover = res.result.aweme_detail.video.cover.url_list[0];
       downloadBtn.innerText = "Download";
-      console.log(videoLinks1);
       if (videoLinks1.includes("https://v25")) {
         //make sure if the server is v25 we need to change it, because it has some issues
         fetchdataOnclick();
@@ -63,8 +58,8 @@ function fetchdataOnclick() {
         popupclick();
       }
     })
-    .catch((err) => {
-      error.innerHTML = `Error Fetching Data Wrong Link ${err.message}`;
+    .catch(() => {
+      error.innerHTML = `Error Fetching Data Wrong Link`;
       downloadBtn.innerText = "Download";
     });
 }
