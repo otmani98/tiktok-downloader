@@ -1,10 +1,11 @@
-let fileInput = document.querySelector("input");
+let Input = document.querySelector("input");
 let downloadBtn = document.querySelector("button");
 let popup = document.querySelector(".popup");
 let blurs = document.querySelector(".blurs");
 let result = document.querySelector(".result");
 let error = document.querySelector(".error");
 
+//to store data that we need from API
 let sizeofVideo;
 let setNameVideo;
 let videoLinks1;
@@ -26,38 +27,44 @@ const options = {
 };
 
 downloadBtn.addEventListener("click", (e) => {
-  error.innerHTML = "";
-  downloadBtn.innerText = "Fetching...";
-  fetchdataOnclick();
+  if (!Input.value) {
+    error.innerHTML = "You can't take input empty!";
+  } else {
+    error.innerHTML = "";
+    downloadBtn.innerText = "Processing...";
+    fetchdataOnclick();
+  }
 });
 
 //
 function fetchdataOnclick() {
-  fetch(`${url}${fileInput.value}`, options)
+  fetch(`${url}${Input.value}`, options)
     .then((res) => {
+      console.log(res);
       if (!res.ok) {
-        throw new Error("Wrong Link");
+        throw new Error();
       }
       return res.json();
     })
     .then((res) => {
-      if (res.result.video.url_list[0].includes("https://v25")) {
-        fetchdataOnclick();
-      }
       sizeofVideo = res.result.video.data_size;
       setNameVideo = res.result.aweme_id;
       videoLinks1 = res.result.video.url_list[0];
-      videoLinks2 = res.result.video.url_list[2];
       audioLink = res.result.music.url_list[0];
       duration = res.result.video.duration;
       desc = res.result.aweme_detail.desc;
       cover = res.result.aweme_detail.video.cover.url_list[0];
-      console.log(videoLinks1);
       downloadBtn.innerText = "Download";
-      popupclick();
+      console.log(videoLinks1);
+      if (videoLinks1.includes("https://v25")) {
+        //make sure if the server is v25 we need to change it, because it has some issues
+        fetchdataOnclick();
+      } else {
+        popupclick();
+      }
     })
-    .catch(() => {
-      error.innerHTML = `Error Fetching Data Wrong Link`;
+    .catch((err) => {
+      error.innerHTML = `Error Fetching Data Wrong Link ${err.message}`;
       downloadBtn.innerText = "Download";
     });
 }
@@ -86,6 +93,7 @@ function popupclick() {
           <button id="au" setData="${audioLink}">Download Audio</button>
         </div>`;
   popup.style.display = "flex";
+  popup.style.opacity = 1;
   blurs.style.display = "block";
 }
 
@@ -93,7 +101,7 @@ function popupclick() {
 function fetchFile(url, buttonId) {
   fetch(url).then((res) => {
     get(res, buttonId);
-    return res.blob();
+    res.blob();
   });
 }
 
@@ -124,7 +132,6 @@ async function get(response, buttonId) {
     }
     chunks.push(value);
     currentsize += value.length;
-    console.log(value.length);
     buttontarget.innerHTML = `Progress ${(
       (currentsize * 100) /
       sizeofVideo
@@ -132,9 +139,10 @@ async function get(response, buttonId) {
   }
 }
 
-//for exitbutton and download buttons
+//Listening for exit button and download buttons
 document.addEventListener("click", function (e) {
   if (e.target.id === "exit") {
+    popup.style.opacity = 0;
     popup.style.display = "none";
     blurs.style.display = "none";
   }
@@ -147,12 +155,10 @@ document.addEventListener("click", function (e) {
 function download(file) {
   let tempUrl = URL.createObjectURL(file);
   const aTag = document.createElement("a");
-  console.log(tempUrl);
   aTag.href = tempUrl;
   aTag.download = setNameVideo;
   document.body.appendChild(aTag);
   aTag.click();
-  downloadBtn.innerText = "Download File";
   URL.revokeObjectURL(tempUrl);
   aTag.remove();
 }

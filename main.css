@@ -216,6 +216,8 @@ a:hover {
   justify-content: space-evenly;
   z-index: 1;
   display: none;
+  transition: 0.3s;
+  opacity: 0;
 }
 
 .img {
@@ -238,6 +240,7 @@ a:hover {
 .content h3 {
   font-size: 15px;
   width: 200px;
+  overflow: hidden;
 }
 
 .error {
